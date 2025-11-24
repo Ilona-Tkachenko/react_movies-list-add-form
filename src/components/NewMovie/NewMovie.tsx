@@ -2,47 +2,45 @@ import { useState } from 'react';
 import { TextField } from '../TextField';
 import { Movie } from '../../types/Movie';
 
-type Props = {
-  onAdd: (movie: Movie) => void;
-};
-
-export const NewMovie: React.FC<Props> = ({ onAdd }) => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [imgUrl, setImgUrl] = useState('');
-  const [imdbUrl, setImdbUrl] = useState('');
-  const [imdbId, setImdbId] = useState('');
+export const NewMovie = ({ onAdd }: { onAdd: (movie: Movie) => void }) => {
   // Increase the count after successful form submission
   // to reset touched status of all the `Field`s
   const [count, setCount] = useState(0);
+  const [title, setTitle] = useState('');
+  const [imgUrl, setImgUrl] = useState('');
+  const [imdbUrl, setImdbUrl] = useState('');
+  const [imdbId, setImdbId] = useState('');
+  const [description, setDescription] = useState('');
 
-  const isFormInvalid =
-    !title.trim() || !imgUrl.trim() || !imdbUrl.trim() || !imdbId.trim();
+  const isValid = [title, imgUrl, imdbUrl, imdbId].every(
+    value => value.trim().length > 0,
+  );
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    const NewMovie: Movie = {
-      title: title.trim(),
-      description: description.trim(),
-      imgUrl: imgUrl.trim(),
-      imdbUrl: imdbUrl.trim(),
-      imdbId: imdbId.trim(),
-    };
-
-    onAdd(NewMovie);
-
+  function resetForm() {
     setTitle('');
-    setDescription('');
     setImgUrl('');
     setImdbUrl('');
     setImdbId('');
-    setCount(prev => prev + 1);
-  };
+    setDescription('');
+    setCount(newCount => newCount + 1);
+  }
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const newMovie = {
+      title: title,
+      imgUrl: imgUrl,
+      imdbUrl: imdbUrl,
+      imdbId: imdbId,
+      description: description,
+    };
+
+    onAdd(newMovie);
+    resetForm();
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="NewMovie" key={count}>
+    <form className="NewMovie" key={count} onSubmit={handleSubmit}>
       <h2 className="title">Add a movie</h2>
 
       <TextField
@@ -65,6 +63,7 @@ export const NewMovie: React.FC<Props> = ({ onAdd }) => {
         label="Image URL"
         value={imgUrl}
         onChange={setImgUrl}
+        required
       />
 
       <TextField
@@ -72,6 +71,7 @@ export const NewMovie: React.FC<Props> = ({ onAdd }) => {
         label="Imdb URL"
         value={imdbUrl}
         onChange={setImdbUrl}
+        required
       />
 
       <TextField
@@ -79,6 +79,7 @@ export const NewMovie: React.FC<Props> = ({ onAdd }) => {
         label="Imdb ID"
         value={imdbId}
         onChange={setImdbId}
+        required
       />
 
       <div className="field is-grouped">
@@ -87,7 +88,7 @@ export const NewMovie: React.FC<Props> = ({ onAdd }) => {
             type="submit"
             data-cy="submit-button"
             className="button is-link"
-            disabled={isFormInvalid}
+            disabled={!isValid}
           >
             Add
           </button>
